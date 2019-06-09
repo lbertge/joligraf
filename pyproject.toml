@@ -12,6 +12,10 @@ termcolor = "^1.1"
 pillow = "^5.4"
 scikit-learn = "^0.20.3"
 umap-learn = "^0.3.7"
+numba = "^0.44.0"
+python-resize-image = "^1.1"
+bokeh = "^1.2"
+pandas = "^0.24.2"
 
 [tool.poetry.dev-dependencies]
 ipython = "^7.3"
