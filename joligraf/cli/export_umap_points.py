@@ -9,7 +9,9 @@ import os
 import numpy as np
 import json
 
-import pdb
+import warnings
+
+warnings.filterwarnings("ignore")
 
 
 def scale(x, out_range=(-1, 1)):
@@ -21,7 +23,8 @@ def scale(x, out_range=(-1, 1)):
 @click.command()
 @click.argument("images_folder", type=click.Path(exists=True))
 @click.option("--limit", type=int, default=1000)
-def main(images_folder, limit):
+@click.option("--out", type=str, default="umap_points.json")
+def main(images_folder, limit, out):
     print(colored(figlet_format("UMAP Export", font="doom"), "cyan"))
     images_folder = pathlib.Path(images_folder)
     image_regex = re.compile(r".*\.(jpg|png|gif)$")
@@ -81,7 +84,7 @@ def main(images_folder, limit):
                 {"image": filename, "x": float(position[0]), "y": float(position[1])}
             )
 
-        with open("umap_points.json", "w") as umap_result_file:
+        with open(out, "w") as umap_result_file:
             json.dump(to_export, umap_result_file)
 
 
