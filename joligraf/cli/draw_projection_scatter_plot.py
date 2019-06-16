@@ -10,9 +10,7 @@ from bokeh.plotting import figure, output_file, show
 from pyfiglet import figlet_format
 from termcolor import colored
 
-TOOLS = (
-    "crosshair,hover,pan,wheel_zoom,zoom_in,zoom_out,reset,tap,save,box_zoom,box_select"
-)
+TOOLS = "crosshair,pan,wheel_zoom,zoom_in,zoom_out,reset,tap,save,box_zoom,box_select"
 
 
 def display_event(div, root_image, source, block_height):
