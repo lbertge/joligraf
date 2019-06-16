@@ -2,7 +2,7 @@
 name = "joligraf"
 version = "0.1.0"
 description = ""
-authors = ["Your Name <you@example.com>"]
+authors = ["Anaelle Laurans"]
 
 [tool.poetry.dependencies]
 python = "^3.7"
@@ -20,6 +20,7 @@ pandas = "^0.24.2"
 [tool.poetry.dev-dependencies]
 ipython = "^7.3"
 flake8 = "^3.7"
+mypy = "^0.701.0"
 
 [build-system]
 requires = ["poetry>=0.12"]
