@@ -22,11 +22,15 @@ warnings.filterwarnings("ignore")
 @click.option("--out", type=str, default="umap_points.json", help="Output file in json")
 def main(images_directory: str, limit: int, out: str):
     """Return UMAP projection points from a folder containing images jpg, png gif
-    
-    Arguments:
-        images_directory {str} -- Path to the directory with images
-        limit {int} -- Max number of images to project
-        out {str} -- JSON output file
+
+    Parameters
+    ----------
+    images_directory : str
+        Path to the directory with images
+    limit : int
+        Max number of images to project
+    out : str
+        JSON output file
     """
     print(colored(figlet_format("UMAP Export", font="doom"), "cyan"))
     assert out[-5:] == ".json", "Please give a json output file"
