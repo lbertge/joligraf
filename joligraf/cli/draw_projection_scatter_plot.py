@@ -1,19 +1,14 @@
-import numpy as np
-import click
 import json
-from bokeh.plotting import figure, output_file, show
-from bokeh.models import (
-    CustomJS,
-    Div,
-    TapTool,
-    HoverTool,
-    BoxSelectTool,
-    ColumnDataSource,
-)
-from bokeh.layouts import row, column
-from bokeh import events
 from pathlib import Path
-from PIL import Image
+from typing import Optional
+
+import click
+import numpy as np
+from bokeh.layouts import column, row
+from bokeh.models import ColumnDataSource, CustomJS, Div
+from bokeh.plotting import figure, output_file, show
+from pyfiglet import figlet_format
+from termcolor import colored
 
 TOOLS = (
     "crosshair,hover,pan,wheel_zoom,zoom_in,zoom_out,reset,tap,save,box_zoom,box_select"
@@ -37,7 +32,7 @@ def display_event(div, root_image, source, block_height):
 
     }})
     htmlcode += "</div>"
-    div.text = htmlcode 
+    div.text = htmlcode
     """.format(
         block_height
     )
@@ -49,10 +44,29 @@ def display_event(div, root_image, source, block_height):
 @click.command()
 @click.argument("images_folder", type=click.Path(exists=True))
 @click.argument("data_json_file", type=click.Path(exists=True))
-@click.option("--img_ref", type=click.Path(exists=True), default=None)
-def main(images_folder, data_json_file, img_ref):
-    images_folder = Path(images_folder).resolve()
-    images_folder = str(images_folder)
+@click.option(
+    "--img_ref",
+    type=click.Path(exists=True),
+    default=None,
+    help="Path of the image version of the projection",
+)
+@click.option(
+    "--out", type=str, default="scatter_projection.html", help="Output html file"
+)
+def main(images_folder: str, data_json_file: str, img_ref: Optional[str], out: str):
+    """Project data point into interactive scatter plot
+
+    Arguments:
+        images_folder {str} -- Path of the images directory
+        data_json_file {str} -- Path of the corresponding json file
+        img_ref {Optional[str]} -- Path of the image version of the projection
+                                   (see create_image_projection.py script)
+        out {str} -- Output html file
+    """
+
+    print(colored(figlet_format("Scatter plot projection", font="standard"), "cyan"))
+    assert out[-5:] == ".html", "Please give a html output file"
+    images_folder = str(Path(images_folder).resolve())
 
     with open(data_json_file, "r") as json_file:
         points_projection = json.load(json_file)
@@ -88,7 +102,7 @@ def main(images_folder, data_json_file, img_ref):
         div_img_ref.text = f"<img style='width:1280px' src='{img_ref}' / >"
         layout = column(layout, div_img_ref)
 
-    output_file("scatter.html", title="scatter projection")
+    output_file(out, title="scatter projection")
 
     show(layout)
 
