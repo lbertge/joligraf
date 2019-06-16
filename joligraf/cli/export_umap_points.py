@@ -1,38 +1,42 @@
+import json
+import os
+from pathlib import Path
+import re
+import warnings
+
 import click
+import numpy as np
+import umap
+from PIL import Image
 from pyfiglet import figlet_format
 from termcolor import colored
-import pathlib
-from PIL import Image
-import umap
-import re
-import os
-import numpy as np
-import json
 
-import warnings
+from joligraf.cli.crossfiles_utils_functions import scale
 
 warnings.filterwarnings("ignore")
 
 
-def scale(x, out_range=(-1, 1)):
-    domain_min, domain_max = np.min(x), np.max(x)
-    a, b = out_range
-    return a + ((x - domain_min) * (b - a)) / (domain_max - domain_min)
-
-
 @click.command()
-@click.argument("images_folder", type=click.Path(exists=True))
-@click.option("--limit", type=int, default=1000)
-@click.option("--out", type=str, default="umap_points.json")
-def main(images_folder, limit, out):
+@click.argument("images_directory", type=click.Path(exists=True))
+@click.option("--limit", type=int, default=1000, help="Max number of images to project")
+@click.option("--out", type=str, default="umap_points.json", help="Output file in json")
+def main(images_directory: str, limit: int, out: str):
+    """Return UMAP projection points from a folder containing images jpg, png gif
+    
+    Arguments:
+        images_directory {str} -- Path to the directory with images
+        limit {int} -- Max number of images to project
+        out {str} -- JSON output file
+    """
     print(colored(figlet_format("UMAP Export", font="doom"), "cyan"))
-    images_folder = pathlib.Path(images_folder)
-    image_regex = re.compile(r".*\.(jpg|png|gif)$")
+    assert out[-5:] == ".json", "Please give a json output file"
+    images_folder: Path = Path(images_directory)
+    image_regex = re.compile(r".*\.(jpg|jpeg|png|gif)$")
 
     list_img_files = [
         filename
         for filename in os.listdir(images_folder.resolve())
-        if image_regex.match(filename) is not None
+        if image_regex.match(filename.lower()) is not None
     ]
 
     list_img_files.sort()
@@ -67,16 +71,8 @@ def main(images_folder, limit, out):
         reducer = umap.UMAP(n_neighbors=5, min_dist=0.3, metric="correlation")
         embeddings = reducer.fit_transform(data)
 
-        print(colored("Ranges", "white", attrs=["underline"]))
-        print(f"X: [{embeddings[:,0].min()},{embeddings[:,0].max()}]")
-        print(f"Y: [{embeddings[:,1].min()},{embeddings[:,1].max()}]")
-
         embeddings[:, 0] = scale(embeddings[:, 0])
         embeddings[:, 1] = scale(embeddings[:, 1])
-
-        print(colored("New Ranges", "white", attrs=["underline"]))
-        print(f"X: [{embeddings[:,0].min()},{embeddings[:,0].max()}]")
-        print(f"Y: [{embeddings[:,1].min()},{embeddings[:,1].max()}]")
 
         to_export = []
         for filename, position in zip(list_img_files[:limit], embeddings):
