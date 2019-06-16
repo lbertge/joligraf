@@ -1,28 +1,30 @@
-from PIL import Image
-import numpy as np
-import click
 import json
 from pathlib import Path
+
+import click
+from PIL import Image
+from pyfiglet import figlet_format
 from resizeimage.resizeimage import resize_thumbnail
+from termcolor import colored
+
+from joligraf.cli.crossfiles_utils_functions import scale
 
 CANVAS_RESOLUTION = (2560, 1440)
 THUMBNAIL_SIZE = (100, 100)
 PADDING = 200
 
 
-def scale(x, in_range=(-1, 1), out_range=(-1, 1)):
-    if in_range is None:
-        domain_min, domain_max = np.min(x), np.max(x)
-    else:
-        domain_min, domain_max = in_range
-    a, b = out_range
-    return a + ((x - domain_min) * (b - a)) / (domain_max - domain_min)
-
-
 @click.command()
 @click.argument("images_folder", type=click.Path(exists=True))
 @click.argument("data_json_file", type=click.Path(exists=True))
-def main(images_folder, data_json_file):
+def main(images_folder: str, data_json_file: str):
+    """Project the images on a big image using the position in the json file 
+    
+    Arguments:
+        images_folder {str} -- Path of the images directory
+        data_json_file {str} -- Path of the corresponding json file
+    """
+    print(colored(figlet_format("IMG projection", font="standard"), "cyan"))
     with open(data_json_file, "r") as json_file:
         points_projection = json.load(json_file)
 
@@ -31,11 +33,13 @@ def main(images_folder, data_json_file):
     for point_properties in points_projection:
         pos_x = scale(
             float(point_properties["x"]),
+            in_range=(0, 1),
             out_range=(PADDING, CANVAS_RESOLUTION[0] - PADDING),
         )
         pos_x = int(pos_x)
         pos_y = scale(
             float(point_properties["y"]),
+            in_range=(0, 1),
             out_range=(PADDING, CANVAS_RESOLUTION[1] - PADDING),
         )
         pos_y = int(pos_y)
