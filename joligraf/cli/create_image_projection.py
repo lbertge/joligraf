@@ -1,11 +1,10 @@
 import json
-from pathlib import Path
 
 import click
 from PIL import Image
 from pyfiglet import figlet_format
-from resizeimage.resizeimage import resize_thumbnail
 from termcolor import colored
+import numpy as np
 
 from joligraf.cli.crossfiles_utils_functions import scale
 
@@ -14,20 +13,7 @@ THUMBNAIL_SIZE = (100, 100)
 PADDING = 200
 
 
-@click.command()
-@click.argument("images_folder", type=click.Path(exists=True))
-@click.argument("data_json_file", type=click.Path(exists=True))
-def main(images_folder: str, data_json_file: str):
-    """Project the images on a big image using the position in the json file 
-    
-    Arguments:
-        images_folder {str} -- Path of the images directory
-        data_json_file {str} -- Path of the corresponding json file
-    """
-    print(colored(figlet_format("IMG projection", font="standard"), "cyan"))
-    with open(data_json_file, "r") as json_file:
-        points_projection = json.load(json_file)
-
+def original_projection(points_projection: list) -> Image:
     canvas = Image.new("RGBA", CANVAS_RESOLUTION)
 
     for point_properties in points_projection:
@@ -43,11 +29,54 @@ def main(images_folder: str, data_json_file: str):
             out_range=(PADDING, CANVAS_RESOLUTION[1] - PADDING),
         )
         pos_y = int(pos_y)
-        img_source = Path(images_folder).joinpath(point_properties["image"])
-        img: Image = Image.open(str(img_source))
-        thumbnail = resize_thumbnail(img, THUMBNAIL_SIZE, Image.ANTIALIAS)
+        img_source = str(point_properties["image"])
+        img: Image = Image.open(img_source)
+        thumbnail = img.resize(THUMBNAIL_SIZE, Image.ANTIALIAS)
 
         canvas.paste(thumbnail, (pos_x, pos_y))
+
+    return canvas
+
+
+def grid_projection(points_projection: list) -> Image:
+    size = int(np.sqrt(len(points_projection)))
+    canvas = Image.new("RGBA", (size * THUMBNAIL_SIZE[0], size * THUMBNAIL_SIZE[0]))
+
+    for point_properties in points_projection:
+        pos_x = float(point_properties["x"])
+        pos_y = float(point_properties["y"])
+
+        pos_x *= (size - 1) * THUMBNAIL_SIZE[0]
+        pos_y *= (size - 1) * THUMBNAIL_SIZE[0]
+
+        pos_x = int(pos_x)
+        pos_y = int(pos_y)
+
+        img_source = str(point_properties["image"])
+        img: Image = Image.open(img_source)
+        thumbnail = img.resize(THUMBNAIL_SIZE, Image.ANTIALIAS)
+
+        canvas.paste(thumbnail, (pos_x, pos_y))
+
+    return canvas
+
+
+@click.command()
+@click.argument("data_json_file", type=click.Path(exists=True))
+def main(data_json_file: str):
+    """Project the images on a big image using the position in the json file 
+    
+    Parameters
+    ----------
+    data_json_file : str
+        Path of the json file containing coordinate and image paths
+    """
+    print(colored(figlet_format("IMG projection", font="standard"), "cyan"))
+    with open(data_json_file, "r") as json_file:
+        points_projection = json.load(json_file)
+
+    # canvas = original_projection(points_projection)
+    canvas = grid_projection(points_projection)
 
     canvas.save("projection.png")
 
