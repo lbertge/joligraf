@@ -59,6 +59,7 @@ def main(npz_filepath, out):
 
         widgets += [row([fig, html_annotation])]
 
+    data.close()
     show(column(*widgets))
 
 
