@@ -1,13 +1,11 @@
 import numpy as np
 import click
 from scipy.stats import describe
-from joligraf.cli.bokeh_helper import create_vhist_figure
 from bokeh.models.widgets import Div
 from bokeh.layouts import column, row
 from bokeh.io import show, output_file
 from pprint import pformat
 import holoviews as hv
-from holoviews import opts
 
 hv.extension("bokeh")
 
