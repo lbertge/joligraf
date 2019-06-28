@@ -20,7 +20,7 @@ def display_event(div, root_image, source, block_height):
     var htmlcode = ""
     htmlcode += "<div style='display: block; overflow: scroll; height: {}px'>"
     indexes.forEach(function (index, i){{
-        var image_path = root_image+data[index]['image']
+        var image_path = data[index]['image']
         var descriptif = "Index:"+index+"| Filename "+ data[index]['image']
         var htmlimg = "<img src='"+image_path+"' style='max-width: 200px' />"
         htmlcode += descriptif
