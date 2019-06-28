@@ -189,7 +189,8 @@ def main(
         embeddings[:, 0] = scale(embeddings[:, 0])
         embeddings[:, 1] = scale(embeddings[:, 1])
 
-        embeddings = jonker_volgenant_projection(embeddings)
+        if jonker_volgenant:
+            embeddings = jonker_volgenant_projection(embeddings)
 
         to_export = []
 
