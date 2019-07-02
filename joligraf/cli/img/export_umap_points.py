@@ -113,6 +113,19 @@ def jonker_volgenant_projection(embeddings) -> Image:
     return grid_jv
 
 
+def export(list_img_files, embeddings, out):
+    to_export = []
+
+    for filename, position in zip(list_img_files, embeddings):
+        to_export.append(
+            {"image": filename, "x": float(position[0]), "y": float(position[1])}
+        )
+
+    with open(out, "w") as umap_result_file:
+        print(f"Export in {out}")
+        json.dump(to_export, umap_result_file)
+
+
 # TODO device choice
 @click.command()
 @click.argument("images_directory", type=click.Path(exists=True))
@@ -189,18 +202,9 @@ def main(
         embeddings[:, 0] = scale(embeddings[:, 0])
         embeddings[:, 1] = scale(embeddings[:, 1])
 
-        if jonker_volgenant:
-            embeddings = jonker_volgenant_projection(embeddings)
-
-        to_export = []
-
-        for filename, position in zip(list_img_files[:limit], embeddings):
-            to_export.append(
-                {"image": filename, "x": float(position[0]), "y": float(position[1])}
-            )
-
-        with open(out, "w") as umap_result_file:
-            json.dump(to_export, umap_result_file)
+        export(list_img_files[:limit], embeddings, out)
+        embeddings_jv = jonker_volgenant_projection(embeddings)
+        export(list_img_files[:limit], embeddings_jv, out[:-5] + "_grid.json")
 
 
 if __name__ == "__main__":
