@@ -63,7 +63,8 @@ def grid_projection(points_projection: list) -> Image:
 
 @click.command()
 @click.argument("data_json_file", type=click.Path(exists=True))
-def main(data_json_file: str):
+@click.option("--grid", "grid", is_flag=True, help="Flag to project on grid")
+def main(data_json_file: str, grid: bool):
     """Project the images on a big image using the position in the json file 
     
     Parameters
@@ -75,8 +76,10 @@ def main(data_json_file: str):
     with open(data_json_file, "r") as json_file:
         points_projection = json.load(json_file)
 
-    # canvas = original_projection(points_projection)
-    canvas = grid_projection(points_projection)
+    if grid:
+        canvas = grid_projection(points_projection)
+    else:
+        canvas = original_projection(points_projection)
 
     canvas.save("projection.png")
 
