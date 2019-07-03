@@ -113,10 +113,17 @@ def jonker_volgenant_projection(embeddings) -> Image:
     return grid_jv
 
 
-def export(list_img_files, embeddings, out):
+def export(list_img_files: list, positions: list, out: str):
+    """Join image path and positions to create a json file with projections coordinate
+    
+    Arguments:
+        list_img_files {list} -- [description]
+        positions {list} -- [description]
+        out {str} -- [description]
+    """
     to_export = []
 
-    for filename, position in zip(list_img_files, embeddings):
+    for filename, position in zip(list_img_files, positions):
         to_export.append(
             {"image": filename, "x": float(position[0]), "y": float(position[1])}
         )
@@ -127,7 +134,12 @@ def export(list_img_files, embeddings, out):
 
 
 # TODO device choice
-@click.command()
+@click.command(
+    help=(
+        "Return two UMAP projections: the original and on a grid layout\n"
+        "It need a folder containing images jpg, png or gif"
+    )
+)
 @click.argument("images_directory", type=click.Path(exists=True))
 @click.option(
     "-R",
@@ -146,10 +158,7 @@ def export(list_img_files, embeddings, out):
     help="Features representation",
 )
 @click.option(
-    "--jv",
-    "jonker_volgenant",
-    is_flag=True,
-    help="Flag to project on grid with jonker volgenant algorithm",
+    "--device", type=str, default="cpu", help="Device to use for pretrained if any"
 )
 def main(
     images_directory: str,
@@ -157,7 +166,7 @@ def main(
     limit: int,
     out: str,
     representation: str,
-    jonker_volgenant: bool,
+    device: str,
 ):
     """
     Return UMAP projection points from a folder containing images jpg, png gif.
@@ -174,13 +183,14 @@ def main(
         JSON output file
     representation : str
         Features representation among 'pixel' and 'resnet'
-    jonker_volgenant: bool
-        Flag to project position on grid
+    device: str
+        Device to run the pretrained model if selected
         
     """
-    print(colored(figlet_format("UMAP Export", font="doom"), "cyan"))
+    print(colored(figlet_format("UMAP Export", font="standard"), "cyan"))
     assert out[-5:] == ".json", "Please give a json output file"
-    images_folder: Path = Path(images_directory)
+
+    images_folder: Path = Path(images_directory).resolve()
 
     list_img_files = get_list_img_filenames(images_folder, recursive)
 
@@ -188,13 +198,13 @@ def main(
         images_folder, list_img_files, limit, features_fn_factory(representation)
     )
 
-    print(colored("Stats", "white", attrs=["underline"]))
-    print(f"Min vector size: {min_vector_size}")
-    print(f"Max vector size: {max_vector_size}")
+    assert min_vector_size == max_vector_size, (
+        f"Features have different sizes: minimum vector size is {min_vector_size} "
+        f"and max vector size is {max_vector_size}. Please check that all your images "
+        f"have the same resolution or use a pretrained model to compute features."
+    )
 
     if min_vector_size == max_vector_size:
-        print(colored("Dataset is uniform, proceed ..."))
-
         data = np.vstack(data)
         reducer = umap.UMAP()
         embeddings = reducer.fit_transform(data)
