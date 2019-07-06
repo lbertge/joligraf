@@ -11,8 +11,6 @@ hv.extension("bokeh")
 
 @click.command()
 @click.argument("data_sequence_folder", type=click.Path(exists=True))
-# @click.option("--imgs", "image_folder", type=click.Path(exists=True))
-# @click.option("--npz", "npz_filepath", type=click.Path(exists=True))
 @click.option("--limit", type=int, default=42)
 @click.option("--start", type=int, default=0)
 @click.option("--out", type=str, default=0)
