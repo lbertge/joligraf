@@ -12,7 +12,7 @@ hv.extension("bokeh")
 
 @click.command()
 @click.argument("npz_filepath", type=click.Path(exists=True))
-@click.option("--out", type=str)
+@click.option("--out", type=str, default="npz_statistic.html")
 def main(npz_filepath, out):
     assert out[-5:] == ".html", "Please enter an html output file"
     data = np.load(npz_filepath)
