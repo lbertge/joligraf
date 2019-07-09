@@ -16,3 +16,9 @@ poetry install
 ```
 
 ### Usage
+
+
+```
+python joligraf/cli/video/videos_extract_frames.py ~/data/MineRLTreechop-v0/r2g1absolute_grape_changeling-15_12958-15286/
+python joligraf/cli/rl/sequence_pair_img_act.py ~/data/MineRLTreechop-v0/r2g1absolute_grape_changeling-15_12958-15286/ --start=0 --limit=50 --out=holo4.html
+```
