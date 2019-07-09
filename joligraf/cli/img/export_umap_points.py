@@ -14,7 +14,7 @@ from pyfiglet import figlet_format
 from scipy.spatial.distance import cdist
 from termcolor import colored
 from torchvision import models, transforms
-from lapjv import lapjv
+from lap import lapjv
 
 from joligraf.cli.crossfiles_utils_functions import scale
 
@@ -107,7 +107,7 @@ def jonker_volgenant_projection(embeddings) -> Image:
     cost_matrix = cdist(grid, embeddings[: size ** 2], "sqeuclidean").astype(np.float32)
     cost_matrix = cost_matrix * (100000 / cost_matrix.max())
 
-    _, col_ind, _ = lapjv(cost_matrix)
+    cost, row_ind, col_ind = lapjv(cost_matrix)
 
     grid_jv = grid[col_ind]
     return grid_jv
