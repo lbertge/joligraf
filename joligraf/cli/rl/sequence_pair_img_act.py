@@ -11,9 +11,9 @@ hv.extension("bokeh")
 
 @click.command()
 @click.argument("data_sequence_folder", type=click.Path(exists=True))
-@click.option("--limit", type=int, default=42)
+@click.option("--limit", type=int, default=-1)
 @click.option("--start", type=int, default=0)
-@click.option("--out", type=str, default=0)
+@click.option("--out", type=str, default="holomap.html")
 def main(data_sequence_folder: str, limit: int, start: int, out: str):
     root = Path(data_sequence_folder)
     img_folder_path = root.joinpath("imgs/")
@@ -25,14 +25,16 @@ def main(data_sequence_folder: str, limit: int, start: int, out: str):
     images_filepaths = list(img_folder_path.glob("*.png"))
     images_filepaths.sort()
 
+    print(len(images_filepaths))
+
     limit = min(start + limit, len(images_filepaths) - 1)
 
     with_slides = {}
     for idx, filepath in enumerate(tqdm(images_filepaths[start:limit])):
-        dataframe = dict([(key, str(value[idx])) for key, value in datasource.items()])
+        dataframe = dict([(key, str(value[start + idx])) for key, value in datasource.items()])
 
         image = hv.RGB.load_image(str(filepath))
-        image.opts(title=f"Frame #{idx+1}")
+        image.opts(title=f"Frame #{start+idx+1}")
         table = hv.Div(pformat(dataframe).replace("\n", "</br>"))
         fig = image + table
         with_slides[idx + 1] = fig
@@ -45,7 +47,7 @@ def main(data_sequence_folder: str, limit: int, start: int, out: str):
 
     layout = hv.Layout([path_info] + [hmap])
 
-    hv.save(layout, "holomap.html")
+    hv.save(layout, out)
 
 
 if __name__ == "__main__":
